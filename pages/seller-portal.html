@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Seller Portal | SAL-MAN</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <a href="../index.html" class="logo">
+          <img
+            src="../assets/sal-man-logo.png"
+            alt="SAL-MAN"
+            class="brand-logo"
+          />
+        </a>
+        <nav class="main-nav">
+          <a href="../index.html">Home</a>
+          <a href="eating.html">Edible Fish</a>
+          <a href="aquarium.html">Aquarium Fish</a>
+          <a href="seller-portal.html" class="active">Sell Here</a>
+        </nav>
+        <div class="nav-actions">
+          <button
+            class="menu-toggle"
+            onclick="toggleMobileMenu()"
+            aria-label="Open navigation"
+            aria-expanded="false"
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="container section">
+      <div id="authSection">
+        <div class="page-title">
+          <p class="eyebrow">SELLER PORTAL</p>
+          <h1>Register or Enter Your Business</h1>
+          <p>
+            Enter your business name and market type to access your dashboard.
+          </p>
+        </div>
+        <div class="form-grid" style="max-width: 420px; margin-top: 24px">
+          <label
+            >Business Name<input id="authName" placeholder="e.g. Rehman Fish"
+          /></label>
+          <label
+            >Market Type
+            <select id="authType">
+              <option value="edible">Edible Fish Market</option>
+              <option value="aquarium">Aquarium Fish Market</option>
+            </select>
+          </label>
+          <button
+            class="btn primary"
+            onclick="loginSeller()"
+            style="margin-top: 8px"
+          >
+            Enter Portal
+          </button>
+        </div>
+      </div>
+
+      <div id="dashboardSection" style="display: none">
+        <div class="page-title">
+          <p class="eyebrow">SELLER DASHBOARD</p>
+          <h1>Welcome, <span id="currentSellerName"></span>!</h1>
+          <p>
+            Add your fish products below. They will appear live on the
+            marketplace immediately.
+          </p>
+        </div>
+        <div class="form-grid" style="max-width: 560px; margin-top: 24px">
+          <label
+            >Fish Name<input id="p_name" placeholder="e.g. Fresh Pomfret"
+          /></label>
+          <label
+            >Category<input id="p_category" placeholder="e.g. Pomfret"
+          /></label>
+          <label
+            >Price (&#8377;)<input
+              id="p_price"
+              type="number"
+              min="0"
+              placeholder="e.g. 500"
+          /></label>
+          <label
+            >Unit<input id="p_unit" placeholder="e.g. kg, pair, each"
+          /></label>
+          <label
+            >Freshness Note<input
+              id="p_fresh"
+              placeholder="e.g. Fresh today, Morning catch"
+          /></label>
+          <label
+            >Photo URL<input id="p_image" placeholder="https://..."
+          /></label>
+          <button
+            class="btn primary"
+            onclick="addSanityProduct()"
+            style="margin-top: 8px"
+          >
+            Publish Product
+          </button>
+        </div>
+        <p id="publishStatus" style="margin-top: 16px; font-weight: bold"></p>
+        <button
+          class="btn secondary"
+          onclick="logoutSeller()"
+          style="margin-top: 24px"
+        >
+          Switch Business
+        </button>
+      </div>
+    </main>
+    <script src="https://unpkg.com/@sanity/client@6.22.1/umd/sanityClient.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/sanity.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/site.js"></script>
+    <script>
+      let currentSeller = null;
+
+      function loginSeller() {
+        const name = document.getElementById("authName").value.trim();
+        const type = document.getElementById("authType").value;
+        if (!name) return alert("Please enter your business name.");
+        currentSeller = { name, type };
+        document.getElementById("authSection").style.display = "none";
+        document.getElementById("dashboardSection").style.display = "block";
+        document.getElementById("currentSellerName").textContent = name;
+      }
+
+      function logoutSeller() {
+        currentSeller = null;
+        document.getElementById("authSection").style.display = "block";
+        document.getElementById("dashboardSection").style.display = "none";
+        document.getElementById("authName").value = "";
+        document.getElementById("publishStatus").textContent = "";
+      }
+
+      async function addSanityProduct() {
+        if (!currentSeller) return;
+        const name = document.getElementById("p_name").value.trim();
+        const price = document.getElementById("p_price").value;
+        const unit = document.getElementById("p_unit").value.trim();
+        if (!name || !price || !unit)
+          return alert("Please fill in Fish Name, Price and Unit.");
+
+        const btn = document.querySelector("#dashboardSection .btn.primary");
+        btn.textContent = "Publishing...";
+        btn.disabled = true;
+
+        const doc = {
+          _type: "product",
+          name,
+          category: document.getElementById("p_category").value.trim(),
+          type: currentSeller.type,
+          sellerName: currentSeller.name,
+          price: Number(price),
+          unit,
+          fresh: document.getElementById("p_fresh").value.trim(),
+          image: document.getElementById("p_image").value.trim(),
+        };
+
+        try {
+          const res = await fetch("/api/add-product", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(doc),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error || "Publish failed");
+          const status = document.getElementById("publishStatus");
+          status.textContent = "Product published successfully!";
+          status.style.color = "green";
+          [
+            "p_name",
+            "p_category",
+            "p_price",
+            "p_unit",
+            "p_fresh",
+            "p_image",
+          ].forEach((id) => (document.getElementById(id).value = ""));
+          setTimeout(() => {
+            status.textContent = "";
+          }, 4000);
+        } catch (err) {
+          console.error(err);
+          document.getElementById("publishStatus").textContent =
+            "Failed to publish: " + err.message;
+          document.getElementById("publishStatus").style.color = "red";
+        }
+
+        btn.textContent = "Publish Product";
+        btn.disabled = false;
+      }
+    </script>
+  </body>
+</html>

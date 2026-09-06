@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aquarium Fish | SAL-MAN</title>
+    <link rel="stylesheet" href="../css/style.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container nav">
+        <a href="../index.html" class="logo">
+          <img src="../assets/sal-man-logo.png" alt="SAL-MAN" class="brand-logo" />
+        </a>
+        <nav class="main-nav">
+          <a href="../index.html">Home</a>
+          <a href="eating.html">Edible Fish</a>
+          <a href="aquarium.html" class="active">Aquarium Fish</a>
+          <a href="seller-portal.html">Sell Here</a>
+        </nav>
+        <div class="nav-actions">
+          <button class="icon-btn" onclick="toggleCart()">
+            Cart <span id="cartCount">0</span></button>
+          <button
+            class="menu-toggle"
+            onclick="toggleMobileMenu()"
+            aria-label="Open navigation"
+            aria-expanded="false"
+          >
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
+    </header>
+    <main class="container section">
+      <div class="page-title aquarium-head">
+        <p class="eyebrow">AQUARIUM MARKET</p>
+        <h1>Bring your aquarium to life.</h1>
+        <p>Browse live ornamental fish from specialist aquarium sellers.</p>
+      </div>
+      <div class="toolbar">
+        <div class="chips" id="aquariumCategories"></div>
+        <select id="aquariumSellerFilter"><option value="all">All sellers</option></select>
+        <select id="aquariumSort">
+          <option value="featured">Featured</option>
+          <option value="priceLow">Price: Low to High</option>
+          <option value="priceHigh">Price: High to Low</option>
+        </select>
+      </div>
+      <div id="aquariumProducts" class="product-grid">
+        <div class="empty-state">Loading products...</div>
+      </div>
+    </main>
+    <div id="cartDrawer" class="drawer">
+      <div class="drawer-panel">
+        <div class="drawer-head">
+          <h3>Your cart</h3>
+          <button onclick="toggleCart()">Close</button>
+        </div>
+        <div id="cartItems"></div>
+        <div class="cart-total">
+          <span>Total</span><strong id="cartTotal">&#8377;0</strong>
+        </div>
+        <button class="btn primary full" onclick="checkout()">Proceed to Checkout</button>
+      </div>
+    </div>
+    <script src="https://unpkg.com/@sanity/client@6.22.1/umd/sanityClient.js"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../js/sanity.js"></script>
+    <script src="../js/supabase.js"></script>
+    <script src="../js/data.js"></script>
+    <script src="../js/app.js"></script>
+    <script src="../js/aquarium.js"></script>
+    <script src="../js/site.js"></script>
+  </body>
+</html>
+
